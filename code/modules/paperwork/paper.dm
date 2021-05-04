@@ -58,9 +58,10 @@
 	metadata = md
 
 	var/old_language = language
-	if (!set_language(language, TRUE))
+	language = global.all_languages[language]
+	if (!language)
 		log_debug("[src] ([type]) initialized with invalid or missing language `[old_language]` defined.")
-		set_language(LANGUAGE_HUMAN_EURO, TRUE)
+		language = global.all_languages[LANGUAGE_HUMAN_EURO]
 
 /obj/item/paper/proc/set_content(text,title)
 	if(title)
@@ -70,18 +71,6 @@
 	update_icon()
 	update_space(info)
 	updateinfolinks()
-
-/obj/item/paper/proc/set_language(datum/language/new_language, force = FALSE)
-	if (!new_language || (info && !force))
-		return FALSE
-
-	if (!istype(new_language))
-		new_language = global.all_languages[new_language]
-	if (!istype(new_language))
-		return FALSE
-
-	language = new_language
-	return TRUE
 
 /obj/item/paper/on_update_icon()
 	if(icon_state == "paper_talisman" || is_memo)
@@ -104,7 +93,7 @@
 	else
 		to_chat(user, "<span class='notice'>You have to go closer if you want to read it.</span>")
 
-/obj/item/paper/verb/user_set_language()
+/obj/item/paper/verb/set_language()
 	set name = "Set writing language"
 	set category = "Object"
 	set src in usr
@@ -137,7 +126,7 @@
 	if (!admin_force && !Adjacent(user) && !CanInteract(user, GLOB.deep_inventory_state))
 		to_chat(user, SPAN_WARNING("You must remain next to or continue holding \the [src] to do that."))
 		return
-	set_language(new_language)
+	language = new_language
 
 
 /obj/item/paper/proc/show_content(mob/user, force, editable)
